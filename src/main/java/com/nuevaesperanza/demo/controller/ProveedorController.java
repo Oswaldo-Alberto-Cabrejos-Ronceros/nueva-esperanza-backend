@@ -43,13 +43,13 @@ public class ProveedorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Proveedor> updateSeguro(@PathVariable Long id, @RequestBody @Valid ProveedorRequest request) {
+    public ResponseEntity<Proveedor> updateProveedor(@PathVariable Long id, @RequestBody @Valid ProveedorRequest request) {
         Proveedor updatedProveedor = proveedorService.updateProveedor(id, request);
         return ResponseEntity.ok(updatedProveedor);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSeguro(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProveedor(@PathVariable Long id) {
         proveedorService.deleteProveedor(id);
         return ResponseEntity.noContent().build();
     }

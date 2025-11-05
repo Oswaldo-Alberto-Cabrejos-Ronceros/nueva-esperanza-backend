@@ -64,22 +64,22 @@ public class ProveedorServiceImpl implements ProveedorService {
     public Proveedor updateProveedor(Long id, ProveedorRequest request) {
         filtroEstado.activarFiltroEstado(true);
 
-        Proveedor findSeguro = repository.findByIdAndEstadoIsTrue(id)
+        Proveedor findProveedor = repository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró el seguro con el id: " + id));
 
         boolean nombreDuplicado = repository.existsByNombreAndEstadoIsTrue(request.getNombre()) &&
-                !findSeguro.getNombre().equalsIgnoreCase(request.getNombre());
+                !findProveedor.getNombre().equalsIgnoreCase(request.getNombre());
 
         if (nombreDuplicado) {
             throw new DuplicateResourceException("Ya existe un seguro con el nombre ingresado");
         }
 
-        findSeguro.setNombre(request.getNombre());
-        findSeguro.setRuc(request.getRuc());
-        findSeguro.setTelefono(request.getTelefono());
-        findSeguro.setDireccion(request.getDireccion());
-        findSeguro.setEmail(request.getEmail());
-        return repository.save(findSeguro);
+        findProveedor.setNombre(request.getNombre());
+        findProveedor.setRuc(request.getRuc());
+        findProveedor.setTelefono(request.getTelefono());
+        findProveedor.setDireccion(request.getDireccion());
+        findProveedor.setEmail(request.getEmail());
+        return repository.save(findProveedor);
     }
 
 
@@ -88,7 +88,7 @@ public class ProveedorServiceImpl implements ProveedorService {
     public void deleteProveedor(Long id) {
         filtroEstado.activarFiltroEstado(true);
         Proveedor findProveedor = repository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new ResourceNotFoundException("No se encontro el seguro con el id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontro el proveedor con el id: " + id));
         findProveedor.setEstado(false);
         repository.save(findProveedor);
     }
