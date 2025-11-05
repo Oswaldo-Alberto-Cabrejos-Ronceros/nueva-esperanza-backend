@@ -8,39 +8,29 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Filter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "empleados")
+@Table(name = "lotes_proveedor")
 @SuperBuilder
 //para filtro
 @Filter(name = "estadoActivo", condition = "estado = :estado")
-public class Employee extends EntidadConEstado{
+public class LoteProveedor extends EntidadConEstado{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column
-    private String nombres;
-    @Column
-    private String apellidos;
+    private String numeroLote;
 
     @Column
-    private String numeroDocumento;
-    @Column
-    private String cargo;
-    @Column
-    private Double salario;
-    @Column
-    private LocalDate fechaNacimiento;
-    @Column
-    private LocalDate fechaContratacion;
+    private LocalDateTime fechaRecepcion;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "proveedor_id")
+    private Proveedor proveedor;
 }

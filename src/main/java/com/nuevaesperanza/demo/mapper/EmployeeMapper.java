@@ -9,6 +9,6 @@ public class EmployeeMapper {
     public Employee mapFromRequestToEmployee(EmployeeRequest request){
         return new Employee(null,request.getNombres(),request.getApellidos(),
                 request.getNumeroDocumento(),request.getCargo(),request.getSalario(),
-                request.getFechaNacimiento(),request.getFechaContratacion());
+                request.getFechaNacimiento(),request.getFechaContratacion(),null);
     }
 }
