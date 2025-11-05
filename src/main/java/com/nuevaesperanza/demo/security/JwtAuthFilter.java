@@ -1,4 +1,4 @@
-package com.clinicaregional.clinica.security;
+package com.nuevaesperanza.demo.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -1,4 +1,4 @@
-package com.nuevaesperanza.demo.dto;
+package com.nuevaesperanza.demo.dto.response;
 
 import com.nuevaesperanza.demo.enums.UserType;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO {
+public class UserResponse {
     private Long id;
     private String email;
     private UserType userType;

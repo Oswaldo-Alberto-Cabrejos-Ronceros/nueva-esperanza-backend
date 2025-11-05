@@ -1,28 +1,30 @@
-package com.clinicaregional.clinica.service;
+package com.nuevaesperanza.demo.service;
 
-import com.clinicaregional.clinica.entity.Usuario;
-import com.clinicaregional.clinica.dto.UsuarioDTO;
-import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
+
+import com.nuevaesperanza.demo.dto.request.UserRequest;
+import com.nuevaesperanza.demo.dto.response.UserResponse;
+import com.nuevaesperanza.demo.entity.User;
+import com.nuevaesperanza.demo.enums.UserType;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface UsuarioService {
-    List<UsuarioDTO> listarUsuarios();
+public interface UserService {
+    List<UserResponse> listarUsuarios();
 
-    Optional<UsuarioDTO> obtenerPorId(Long id);
+    Optional<UserResponse> obtenerPorId(Long id);
 
     //para mantener contexto
 
-    Optional<Usuario> obtenerPorIdContenxt(Long id);
+    Optional<User> obtenerPorIdContenxt(Long id);
 
-    Optional<Usuario> obtenerPorCorreo(String correo); // para autenticación interna
+    Optional<User> obtenerPorCorreo(String correo); // para autenticación interna
 
-    List<UsuarioDTO> obtenerPorRol(Long rolId);
+    List<UserResponse> obtenerPorRol(UserType userType);
 
-    UsuarioDTO guardar(UsuarioRequestDTO usuarioRequestDTO); // cambia DTO por RequestDTO
+    UserResponse guardar(UserRequest usuarioRequestDTO); // cambia DTO por RequestDTO
 
-    UsuarioDTO actualizar(Long id, UsuarioRequestDTO usuarioRequestDTO); // idem
+    UserResponse actualizar(Long id, UserRequest usuarioRequestDTO); // idem
 
     void eliminar(Long id);
 

@@ -1,4 +1,4 @@
-package com.clinicaregional.clinica.exception;
+package com.nuevaesperanza.demo.exception;
 
 public class EmailSendingException extends RuntimeException {
     public EmailSendingException(String message, Throwable cause) {

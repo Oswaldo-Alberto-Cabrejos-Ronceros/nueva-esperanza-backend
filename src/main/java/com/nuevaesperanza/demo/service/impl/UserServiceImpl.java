@@ -1,62 +1,49 @@
-package com.clinicaregional.clinica.service.impl;
+package com.nuevaesperanza.demo.service.impl;
 
-import com.clinicaregional.clinica.dto.UsuarioDTO;
-import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
-import com.clinicaregional.clinica.entity.*;
-import com.clinicaregional.clinica.exception.BadRequestException;
-import com.clinicaregional.clinica.exception.DuplicateResourceException;
-import com.clinicaregional.clinica.exception.ResourceNotFoundException;
-import com.clinicaregional.clinica.mapper.UsuarioMapper;
-import com.clinicaregional.clinica.repository.*;
-import com.clinicaregional.clinica.service.UsuarioService;
-import com.clinicaregional.clinica.util.FiltroEstado;
 
-import jakarta.annotation.PostConstruct;
+import com.nuevaesperanza.demo.dto.request.UserRequest;
+import com.nuevaesperanza.demo.dto.response.UserResponse;
+import com.nuevaesperanza.demo.entity.User;
+import com.nuevaesperanza.demo.enums.UserType;
+import com.nuevaesperanza.demo.exception.BadRequestException;
+import com.nuevaesperanza.demo.exception.DuplicateResourceException;
+import com.nuevaesperanza.demo.exception.ResourceNotFoundException;
+import com.nuevaesperanza.demo.mapper.UserMapper;
+import com.nuevaesperanza.demo.repository.UserRepository;
+import com.nuevaesperanza.demo.service.UserService;
+import com.nuevaesperanza.demo.util.FiltroEstado;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class UsuarioServiceImpl implements UsuarioService {
+public class UserServiceImpl implements UserService {
 
-    private final UsuarioRepository usuarioRepository;
-    private final RolRepository rolRepository;
+    private final UserRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UsuarioMapper usuarioMapper;
-    private final PacienteRepository pacienteRepository;
-    private final MedicoRepository medicoRepository;
-    private final RecepcionistaRepository recepcionistaRepository;
-    private final AdministradorRepository administradorRepository;
+    private final UserMapper usuarioMapper;
     private final FiltroEstado filtroEstado;
 
     @Autowired
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, RolRepository rolRepository,
-            PasswordEncoder passwordEncoder, UsuarioMapper usuarioMapper,
-            PacienteRepository pacienteRepository, MedicoRepository medicoRepository,
-            RecepcionistaRepository recepcionistaRepository,
-            AdministradorRepository administradorRepository, FiltroEstado filtroEstado) {
+    public UserServiceImpl(UserRepository usuarioRepository,
+                           PasswordEncoder passwordEncoder, UserMapper usuarioMapper, FiltroEstado filtroEstado) {
         this.usuarioRepository = usuarioRepository;
-        this.rolRepository = rolRepository;
         this.passwordEncoder = passwordEncoder;
         this.usuarioMapper = usuarioMapper;
-        this.pacienteRepository = pacienteRepository;
-        this.medicoRepository = medicoRepository;
-        this.recepcionistaRepository = recepcionistaRepository;
-        this.administradorRepository = administradorRepository;
         this.filtroEstado = filtroEstado;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<UsuarioDTO> listarUsuarios() {
+    public List<UserResponse> listarUsuarios() {
         filtroEstado.activarFiltroEstado(true);
         return usuarioRepository.findAll()
                 .stream()
@@ -66,7 +53,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<UsuarioDTO> obtenerPorId(Long id) {
+    public Optional<UserResponse> obtenerPorId(Long id) {
         filtroEstado.activarFiltroEstado(true);
         return usuarioRepository.findByIdAndEstadoIsTrue(id)
                 .map(usuarioMapper::mapToUsuarioDTO);
@@ -74,21 +61,21 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<Usuario> obtenerPorIdContenxt(Long id) {
+    public Optional<User> obtenerPorIdContenxt(Long id) {
         return usuarioRepository.findById(id);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<Usuario> obtenerPorCorreo(String correo) {
+    public Optional<User> obtenerPorCorreo(String correo) {
         filtroEstado.activarFiltroEstado(true);
         log.debug("Buscando usuario por correo: {}", correo);
 
         // Asegúrate de que esta consulta incluya la contraseña
-        Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreoAndEstadoIsTrue(correo);
+        Optional<User> usuarioOpt = usuarioRepository.findByEmailAndEstadoIsTrue(correo);
 
         if (usuarioOpt.isPresent()) {
-            Usuario usuario = usuarioOpt.get();
+            User usuario = usuarioOpt.get();
             log.debug("Usuario encontrado - ID: {}, Password null? {}",
                     usuario.getId(), usuario.getPassword() == null);
         } else {
@@ -100,9 +87,9 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<UsuarioDTO> obtenerPorRol(Long rolId) {
+    public List<UserResponse> obtenerPorRol(UserType userType) {
         filtroEstado.activarFiltroEstado(true);
-        return usuarioRepository.findByRol_Id(rolId)
+        return usuarioRepository.findByUserType(userType)
                 .stream()
                 .map(usuarioMapper::mapToUsuarioDTO)
                 .collect(Collectors.toList());
@@ -110,63 +97,54 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Transactional
     @Override
-    public UsuarioDTO guardar(UsuarioRequestDTO request) {
+    public UserResponse guardar(UserRequest request) {
         filtroEstado.activarFiltroEstado(true);
 
         // Validación adicional
-        if (request.getCorreo() == null || request.getCorreo().isEmpty()) {
+        if (request.getEmail() == null || request.getEmail().isEmpty()) {
             throw new BadRequestException("El correo es obligatorio");
         }
         if (request.getPassword() == null || request.getPassword().isEmpty()) {
             throw new BadRequestException("La contraseña es obligatoria");
         }
-        if (request.getRol() == null || request.getRol().getId() == null) {
-            throw new BadRequestException("El rol es obligatorio");
+        if (request.getUserType() == null) {
+            throw new BadRequestException("El tyipo es obligatorio");
         }
 
-        if (usuarioRepository.existsByCorreoAndEstadoIsTrue(request.getCorreo())) {
+        if (usuarioRepository.existsByEmailAndEstadoIsTrue(request.getEmail())) {
             throw new DuplicateResourceException("Ya existe un usuario con el correo ingresado");
         }
 
-        Usuario usuario = usuarioMapper.mapFromUsuarioRequestDTOToUsuario(request);
+        User usuario = usuarioMapper.mapFromUsuarioRequestDTOToUsuario(request);
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-
-        Rol rol = rolRepository.findById(request.getRol().getId())
-                .orElseThrow(() -> new BadRequestException("El rol especificado no existe"));
-        usuario.setRol(rol);
 
         // Asegurar que el estado esté activo
         usuario.setEstado(true);
 
-        Usuario usuarioSaved = usuarioRepository.save(usuario);
+        User usuarioSaved = usuarioRepository.save(usuario);
         return usuarioMapper.mapToUsuarioDTO(usuarioSaved);
     }
 
     @Transactional
     @Override
-    public UsuarioDTO actualizar(Long id, UsuarioRequestDTO request) {
+    public UserResponse actualizar(Long id, UserRequest request) {
         filtroEstado.activarFiltroEstado(true);
 
-        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(id)
+        User usuario = usuarioRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe un usuario con el id: " + id));
 
         // Verifica si el correo se modificó y si ya existe otro usuario con ese correo
-        boolean correoDuplicado = usuarioRepository.existsByCorreoAndEstadoIsTrue(request.getCorreo())
-                && !usuario.getCorreo().equalsIgnoreCase(request.getCorreo());
+        boolean correoDuplicado = usuarioRepository.existsByEmailAndEstadoIsTrue(request.getEmail())
+                && !usuario.getEmail().equalsIgnoreCase(request.getEmail());
 
         if (correoDuplicado) {
             throw new DuplicateResourceException("Ya existe un usuario con el correo ingresado");
         }
 
-        usuario.setCorreo(request.getCorreo());
+        usuario.setEmail(request.getEmail());
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        Rol rol = rolRepository.findById(request.getRol().getId())
-                .orElseThrow(() -> new BadRequestException("El rol especificado no existe"));
-
-        usuario.setRol(rol);
-
-        Usuario usuarioSaved = usuarioRepository.save(usuario);
+        User usuarioSaved = usuarioRepository.save(usuario);
         return usuarioMapper.mapToUsuarioDTO(usuarioSaved);
     }
 
@@ -175,54 +153,17 @@ public class UsuarioServiceImpl implements UsuarioService {
     public void eliminar(Long id) {
         filtroEstado.activarFiltroEstado(true);
 
-        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(id)
+        User usuario = usuarioRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe un usuario con el id: " + id));
 
         usuario.setEstado(false); // Borrado lógico
         usuarioRepository.save(usuario);
-
-        switch (usuario.getRol().getNombre()) {
-            case "ADMIN":
-                Administrador administrador = administradorRepository.findByUsuario_Id(usuario.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "Administrador no existe con el id de usuario ingresado"));
-                administrador.setUsuario(null);
-                administrador.setEstado(false);
-                administradorRepository.save(administrador);
-                break;
-            case "PACIENTE":
-                Paciente paciente = pacienteRepository.findByUsuario_Id(usuario.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "Paciente no existe con el id de usuario ingresado"));
-                paciente.setUsuario(null);
-                paciente.setEstado(false);
-                pacienteRepository.save(paciente);
-                break;
-            case "MEDICO":
-                Medico medico = medicoRepository.findByUsuario_Id(usuario.getId())
-                        .orElseThrow(
-                                () -> new ResourceNotFoundException("Médico no existe con el id de usuario ingresado"));
-                medico.setUsuario(null);
-                medico.setEstado(false);
-                medicoRepository.save(medico);
-                break;
-            case "RECEPCIONISTA":
-                Recepcionista recepcionista = recepcionistaRepository.findByUsuario_Id(usuario.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "Recepcionista no existe con el id de usuario ingresado"));
-                recepcionista.setUsuario(null);
-                recepcionista.setEstado(false);
-                recepcionistaRepository.save(recepcionista);
-                break;
-            default:
-                throw new BadRequestException("Rol no manejado: " + usuario.getRol().getNombre());
-        }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void eliminarUsuarioSinRelaciones(Long usuarioId) {
-        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(usuarioId)
+        User usuario = usuarioRepository.findByIdAndEstadoIsTrue(usuarioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         // Solo marca el usuario como inactivo sin tocar las relaciones

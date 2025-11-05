@@ -1,4 +1,4 @@
-package com.clinicaregional.clinica.util;
+package com.nuevaesperanza.demo.util;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

@@ -1,30 +1,20 @@
 package com.nuevaesperanza.demo.dto.request;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.time.LocalDate;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
-
-    // Datos de usuario
-    @NotBlank
-    @Email
-    private String email;
-
-    @NotBlank
-    @Size(min = 6, max = 32)
-    @Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d).*$")
-    private String password;
-
-    // Datos personales
+public class EmployeeRequest {
     @NotBlank
     @Size(min = 2, max = 48)
     private String nombres;
@@ -50,5 +40,4 @@ public class RegisterRequest {
     @NotNull
     @PastOrPresent
     private LocalDate fechaContratacion;
-
 }

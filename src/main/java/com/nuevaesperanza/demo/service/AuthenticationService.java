@@ -1,8 +1,9 @@
-package com.clinicaregional.clinica.service;
+package com.nuevaesperanza.demo.service;
 
-import com.clinicaregional.clinica.dto.request.RegisterRequest;
-import com.clinicaregional.clinica.dto.response.AuthenticationResponseDTO;
-import com.clinicaregional.clinica.dto.request.LoginRequestDTO;
+
+import com.nuevaesperanza.demo.dto.request.LoginRequestDTO;
+import com.nuevaesperanza.demo.dto.request.RegisterRequest;
+import com.nuevaesperanza.demo.dto.response.AuthenticationResponseDTO;
 
 public interface AuthenticationService {
     //para autenticar usuario
@@ -10,7 +11,5 @@ public interface AuthenticationService {
 
     //para refrescar token
     String refreshToken(String refreshToken);
-
-    AuthenticationResponseDTO registerPaciente(RegisterRequest registerRequest);
 
 }

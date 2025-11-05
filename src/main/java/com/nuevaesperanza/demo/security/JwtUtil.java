@@ -1,4 +1,4 @@
-package com.clinicaregional.clinica.security;
+package com.nuevaesperanza.demo.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

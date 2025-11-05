@@ -1,6 +1,7 @@
-package com.clinicaregional.clinica.config;
+package com.nuevaesperanza.demo.config;
 
-import com.clinicaregional.clinica.util.FiltroEstado;
+
+import com.nuevaesperanza.demo.util.FiltroEstado;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

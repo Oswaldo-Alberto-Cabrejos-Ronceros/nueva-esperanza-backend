@@ -1,11 +1,10 @@
-package com.clinicaregional.clinica.service.impl;
+package com.nuevaesperanza.demo.service.impl;
 
-import com.clinicaregional.clinica.entity.Usuario;
-import com.clinicaregional.clinica.service.UsuarioService;
-import com.clinicaregional.clinica.util.FiltroEstado;
 
+import com.nuevaesperanza.demo.entity.User;
+import com.nuevaesperanza.demo.service.UserService;
+import com.nuevaesperanza.demo.util.FiltroEstado;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,11 +17,11 @@ import java.util.List;
 @Service
 @Slf4j
 public class UserDetailsServiceImpl implements UserDetailsService {
-    private final UsuarioService usuarioService;
+    private final UserService usuarioService;
     private final FiltroEstado filtroEstado;
 
     @Autowired
-    public UserDetailsServiceImpl(UsuarioService usuarioService, FiltroEstado filtroEstado) {
+    public UserDetailsServiceImpl(UserService usuarioService, FiltroEstado filtroEstado) {
         this.usuarioService = usuarioService;
         this.filtroEstado = filtroEstado;
     }
@@ -33,16 +32,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             filtroEstado.activarFiltroEstado(true);
 
             log.debug("Buscando usuario con correo: {}", username);
-            Usuario usuario = usuarioService.obtenerPorCorreo(username)
+            User usuario = usuarioService.obtenerPorCorreo(username)
                     .orElseThrow(() -> {
                         log.error("Usuario no encontrado con correo: {}", username);
                         return new UsernameNotFoundException("Usuario no encontrado con correo: " + username);
                     });
 
-            log.debug("Usuario encontrado: ID={}, Correo={}", usuario.getId(), usuario.getCorreo());
+            log.debug("Usuario encontrado: ID={}, Correo={}", usuario.getId(), usuario.getEmail());
 
             // Validaciones detalladas
-            if (usuario.getCorreo() == null || usuario.getCorreo().isEmpty()) {
+            if (usuario.getEmail() == null || usuario.getEmail().isEmpty()) {
                 log.error("El correo del usuario es nulo o vacío");
                 throw new IllegalStateException("El correo del usuario no puede ser nulo o vacío");
             }
@@ -57,22 +56,17 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 throw new UsernameNotFoundException("Usuario inactivo");
             }
 
-            if (usuario.getRol() == null) {
+            if (usuario.getUserType() == null) {
                 log.error("Usuario no tiene rol asignado. ID: {}", usuario.getId());
                 throw new IllegalStateException("Usuario no tiene rol asignado");
             }
 
-            String rol = usuario.getRol().getNombre();
-            if (rol == null || rol.isEmpty()) {
-                log.error("El nombre del rol es nulo o vacío. ID Rol: {}", usuario.getRol().getId());
-                throw new IllegalStateException("El nombre del rol no puede ser nulo o vacío");
-            }
 
-            log.debug("Creando UserDetails para usuario {} con rol {}", usuario.getCorreo(), rol);
+            log.debug("Creando UserDetails para usuario {} con rol {}", usuario.getEmail(), usuario.getUserType());
             return new org.springframework.security.core.userdetails.User(
-                    usuario.getCorreo(),
+                    usuario.getEmail(),
                     usuario.getPassword(),
-                    List.of(new SimpleGrantedAuthority("ROLE_" + rol)));
+                    List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getUserType())));
         } catch (Exception e) {
             log.error("Error en loadUserByUsername para usuario: " + username, e);
             throw e;

@@ -1,0 +1,99 @@
+package com.nuevaesperanza.demo.controller;
+
+
+import com.nuevaesperanza.demo.dto.request.LoginRequestDTO;
+import com.nuevaesperanza.demo.dto.response.AuthenticationResponseDTO;
+import com.nuevaesperanza.demo.service.AuthenticationService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthenticationController {
+    private final AuthenticationService authenticationService;
+
+    @Autowired
+    public AuthenticationController(
+            AuthenticationService authenticationService
+    ) {
+        this.authenticationService = authenticationService;
+    }
+
+    // funcion para agregar cookie a la respuesta
+    private void addCokkie(HttpServletResponse response, String name, String value, int duration) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setHttpOnly(true);
+        cookie.setAttribute("SameSite", "None");
+        cookie.setSecure(true); // en produccion ira en true al trabajar en https
+        cookie.setPath("/");
+        cookie.setMaxAge(duration);
+        response.addCookie(cookie);
+    }
+
+    // funcion para eliminar una cookie
+    private void deleteCokkie(HttpServletResponse response, String name) {
+        Cookie cookie = new Cookie(name, "");
+        cookie.setHttpOnly(true);
+        cookie.setAttribute("SameSite", "None");
+        cookie.setSecure(true); // en produccion ira en true al trabajar en https
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
+        try {
+            AuthenticationResponseDTO authenticationResponseDTO = authenticationService
+                    .authenticateUser(loginRequestDTO);
+            addCokkie(response, "jwtToken", authenticationResponseDTO.getJwtToken(), 3600);
+            addCokkie(response, "refreshToken", authenticationResponseDTO.getRefreshToken(), 432000);
+            AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(
+                    authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getType());
+            return ResponseEntity.ok(responseToSend);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Sin cookies"));
+        }
+        Optional<Cookie> refreshToken = Arrays.stream(cookies)
+                .filter(c -> c.getName().equals("refreshToken"))
+                .findFirst();
+        if (refreshToken.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Refresh token no encontrado"));
+        }
+
+        try {
+            String newAccessToken = authenticationService.refreshToken(refreshToken.get().getValue());
+            addCokkie(response, "jwtToken", newAccessToken, 3600);
+            return ResponseEntity.ok(Map.of("Message", "Token refrescado correctamente"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        deleteCokkie(response, "jwtToken");
+        deleteCokkie(response, "refreshToken");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Map.of("Message", "Logout exitoso"));
+    }
+
+}

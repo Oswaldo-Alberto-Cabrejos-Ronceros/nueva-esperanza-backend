@@ -1,6 +1,5 @@
 package com.nuevaesperanza.demo.entity;
 
-import com.nuevaesperanza.demo.enums.UserType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,25 +8,32 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Filter;
 
+@Entity
 @Getter
 @Setter
-@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "proveedores")
 @SuperBuilder
 //para filtro
 @Filter(name = "estadoActivo", condition = "estado = :estado")
-public class User extends EntidadConEstado{
+public class Proveedor extends EntidadConEstado{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column
+    private String nombre;
+
+    @Column
+    private String ruc;
+
+    @Column
+    private String telefono;
+
+    @Column
+    private String direccion;
+
+    @Column
     private String email;
-
-    @Column(nullable = false)
-    private String password;
-
-    @Enumerated(EnumType.STRING)
-    private UserType userType;
 }

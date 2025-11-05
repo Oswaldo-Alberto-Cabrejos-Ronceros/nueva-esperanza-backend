@@ -1,5 +1,5 @@
 
-package com.clinicaregional.clinica.exception;
+package com.nuevaesperanza.demo.exception;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -1,4 +1,4 @@
-package com.clinicaregional.clinica.exception;
+package com.nuevaesperanza.demo.exception;
 
 public class DuplicateResourceException extends RuntimeException {
     public DuplicateResourceException(String message) {
