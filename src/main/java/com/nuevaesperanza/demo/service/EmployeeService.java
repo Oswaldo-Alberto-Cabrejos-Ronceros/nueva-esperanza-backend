@@ -1,6 +1,7 @@
 package com.nuevaesperanza.demo.service;
 
 import com.nuevaesperanza.demo.dto.request.EmployeeRequest;
+import com.nuevaesperanza.demo.dto.request.EmployeeWithUser;
 import com.nuevaesperanza.demo.dto.request.ProveedorRequest;
 import com.nuevaesperanza.demo.entity.Employee;
 import com.nuevaesperanza.demo.entity.Proveedor;
@@ -16,6 +17,8 @@ public interface EmployeeService {
     Optional<Employee> getEmpleadoByNumeroDocumento(String numeroDocumento);
 
     Employee createEmpleado(EmployeeRequest request);
+
+    Employee createEmpleadoConUsuario(EmployeeWithUser request);
 
     Employee updateEmpleado(Long id, EmployeeRequest request);
 

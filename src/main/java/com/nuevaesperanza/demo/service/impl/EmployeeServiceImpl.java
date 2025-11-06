@@ -1,13 +1,16 @@
 package com.nuevaesperanza.demo.service.impl;
 
 import com.nuevaesperanza.demo.dto.request.EmployeeRequest;
+import com.nuevaesperanza.demo.dto.request.EmployeeWithUser;
+import com.nuevaesperanza.demo.dto.response.UserResponse;
 import com.nuevaesperanza.demo.entity.Employee;
-import com.nuevaesperanza.demo.entity.Proveedor;
+import com.nuevaesperanza.demo.entity.User;
 import com.nuevaesperanza.demo.exception.DuplicateResourceException;
 import com.nuevaesperanza.demo.exception.ResourceNotFoundException;
 import com.nuevaesperanza.demo.mapper.EmployeeMapper;
 import com.nuevaesperanza.demo.repository.EmployeeRepository;
 import com.nuevaesperanza.demo.service.EmployeeService;
+import com.nuevaesperanza.demo.service.UserService;
 import com.nuevaesperanza.demo.util.FiltroEstado;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +24,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeMapper mapper;
 
-    public EmployeeServiceImpl(EmployeeRepository repository, FiltroEstado filtroEstado, EmployeeMapper mapper) {
+    private final UserService userService;
+
+    public EmployeeServiceImpl(EmployeeRepository repository, FiltroEstado filtroEstado, EmployeeMapper mapper, UserService userService) {
         this.repository = repository;
         this.filtroEstado = filtroEstado;
         this.mapper = mapper;
+        this.userService = userService;
     }
 
     @Override
@@ -48,10 +54,24 @@ public class EmployeeServiceImpl implements EmployeeService {
         filtroEstado.activarFiltroEstado(true);
 
         if (repository.existsBynumeroDocumentoAndEstadoIsTrue(request.getNumeroDocumento())) {
-            throw new DuplicateResourceException("El nombre ya existe");
+            throw new DuplicateResourceException("El numero documento ya existe");
         }
 
         Employee employee = mapper.mapFromRequestToEmployee(request);
+        return repository.save(employee);
+    }
+
+    @Override
+    public Employee createEmpleadoConUsuario(EmployeeWithUser request) {
+        //primero creamos usuario
+        filtroEstado.activarFiltroEstado(true);
+        UserResponse userSaved = userService.guardar(request.getUserRequest());
+        if (repository.existsBynumeroDocumentoAndEstadoIsTrue(request.getEmployeeRequest().getNumeroDocumento())) {
+            throw new DuplicateResourceException("El numero documento ya existe");
+        }
+        Employee employee = mapper.mapFromRequestToEmployee(request.getEmployeeRequest());
+        User user = new User();
+        user.setId(userSaved.getId());
         return repository.save(employee);
     }
 

@@ -1,9 +1,6 @@
 package com.nuevaesperanza.demo.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,9 +26,9 @@ public class EmployeeRequest {
     @NotBlank
     private String cargo;
 
-    @NotBlank
+    @NotNull(message = "El salario es obligatorio")
+    @Positive(message = "El salario debe ser mayor que 0")
     private Double salario;
-
 
     @NotNull
     @PastOrPresent

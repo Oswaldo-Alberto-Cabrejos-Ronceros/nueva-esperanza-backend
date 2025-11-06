@@ -30,7 +30,7 @@ public class LoteProveedor extends EntidadConEstado{
     @Column
     private LocalDateTime fechaRecepcion;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "proveedor_id")
     private Proveedor proveedor;
 }

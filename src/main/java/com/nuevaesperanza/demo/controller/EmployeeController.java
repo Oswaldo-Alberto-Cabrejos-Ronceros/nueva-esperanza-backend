@@ -1,6 +1,7 @@
 package com.nuevaesperanza.demo.controller;
 
 import com.nuevaesperanza.demo.dto.request.EmployeeRequest;
+import com.nuevaesperanza.demo.dto.request.EmployeeWithUser;
 import com.nuevaesperanza.demo.dto.request.ProveedorRequest;
 import com.nuevaesperanza.demo.entity.Employee;
 import com.nuevaesperanza.demo.entity.Proveedor;
@@ -40,8 +41,14 @@ public class EmployeeController {
 
     @PostMapping
     public ResponseEntity<Employee> createEmployee(@RequestBody @Valid EmployeeRequest request) {
-        Employee savedProveedor = service.createEmpleado(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedProveedor);
+        Employee savedEmployee = service.createEmpleado(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedEmployee);
+    }
+
+    @PostMapping("/with-user")
+    public ResponseEntity<Employee> createEmployeeWithUser(@RequestBody @Valid EmployeeWithUser request){
+        Employee savedEmployee = service.createEmpleadoConUsuario(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedEmployee);
     }
 
     @PutMapping("/{id}")

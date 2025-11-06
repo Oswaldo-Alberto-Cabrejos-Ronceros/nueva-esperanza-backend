@@ -53,6 +53,7 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
+       System.out.println("Entrando a login");
         try {
             AuthenticationResponseDTO authenticationResponseDTO = authenticationService
                     .authenticateUser(loginRequestDTO);
